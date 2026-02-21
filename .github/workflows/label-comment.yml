@@ -1,0 +1,35 @@
+name: Label Comment Bot
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const label = context.payload.label.name;
+            const issue_number = context.payload.issue.number;
+            
+            let body = '';
+            if (label === 'feature') {
+              body = 'Thank you for the feature request. We will consider including this in a future release.';
+            } else if (label === 'enhancement') {
+              body = 'Thanks for the enhancement suggestion! We appreciate your input.';
+            } else if (label === 'completed') {
+              body = 'This issue has been resolved. Thank you for your contribution!';
+            }
+            
+            if (body) {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: body
+              });
+            }
